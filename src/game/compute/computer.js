@@ -3,9 +3,10 @@ import Tank from './objects/Tank/tank.js'
 import Grid from "./objects/Grid/grid.js";
 
 class Computer {
-    constructor({ state, size: { width, height } }) {
+    constructor({ state, uiConnector, size: { width, height } }) {
         this.state = state
-        this.camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 100)
+        this.uiConnector = uiConnector
+        this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100)
         this.camera.position.set( 0, 15, 10 )
         this.camera.rotation.set( -Math.PI / 3.4, 0, 0 )
         this.objects = [
@@ -67,8 +68,7 @@ class Computer {
 
     compute(time, actions) {
         this.performActions(actions)
-
-        this.state.ui.mapData = this.getMapData()
+        this.uiConnector.dispatch('setMapData', this.getMapData())
 
         const scene = new THREE.Scene()
         for (const obj of this.objects) {

@@ -18,15 +18,21 @@ const cameraActions = (event) => {
         {
             const actionName = 'moveCamera'
             const direction = CAMERA_DIRECTION_BY_ARROW[event.code]
-            return { actionName, payload: { direction }}
+            return [actionName, { direction }]
         }
     }
-    return {}
+    return []
+}
+
+const selectionActions = () => {
+    console.log('aa')
+    return []
 }
 
 class UserInteractionManager {
-    constructor({ state }) {
+    constructor({ state, uiConnector }) {
         this.state = state
+        this.uiConnector = uiConnector
         this.patch = []
         document.addEventListener('keydown', this.globalKeyDownListener)
         document.addEventListener('mousedown', this.globalMouseDownHandler)
@@ -36,12 +42,14 @@ class UserInteractionManager {
         }
     }
 
-    dispatch({ actionName, payload }) {
-        this.patch.push({ actionName, payload })
+    dispatch(actionName, payload) {
+        if (actionName) {
+            this.patch.push({ actionName, payload })
+        }
     }
 
     globalKeyDownListener = (event) => {
-        this.state.userInteraction.isCameraAvailable && this.dispatch(cameraActions(event))
+        this.state.userInteraction.isCameraAvailable && this.dispatch(...cameraActions(event))
     }
 
     globalMouseDownHandler = (event) => {
@@ -55,7 +63,10 @@ class UserInteractionManager {
     }
 
     globalComplexDragEvent = (mouseUpEvent, mouseMoveEvent, mouseDownEvent) => {
-        console.log(mouseUpEvent.type, mouseMoveEvent.type, mouseDownEvent?.type)
+        const patch = selectionActions(this.state, mouseUpEvent, mouseMoveEvent, mouseDownEvent)
+        if (patch.length) {
+            this.dispatch(patch)
+        }
     }
 
     handleDragEvent = (event) => {
